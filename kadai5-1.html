@@ -9,14 +9,31 @@
         郵便番号：<input type="text" name="zipcode">
         <button type="button" id="btn1" onclick="zip_api(this.form)">実行</button>
     </p></form>
-    
+
     <div id="result">結果はここに表示</div>
     <script>
         async function zip_api(myForm) {
             const endpoint = "https://zipcloud.ibsnet.co.jp/api/search";
             // ここにコードを書く
-            // zipcloudのAPI呼び出して結果を表示する
-            document.getElementById("result").innerHTML =  myForm.zipcode.value; // 現状ではそのまま表示しているだけ
+            const zipcode = myForm.zipcode.value;
+            const url = `${endpoint}?zipcode=${zipcode}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.status === 200 && data.results) {
+                    const result = data.results[0];
+                    const address =
+                    `<b>都道府県:</b> ${result.address1}<br>
+                    <b>市区町村:</b> ${result.address2}<br>
+                    <b>町域名:</b> ${result.address3}`;
+                    document.getElementById("result").innerHTML = address;
+                } else {
+                    document.getElementById("result").innerHTML = data.message || "該当する住所が見つかりませんでした。";
+                }
+            } catch (error) {
+                console.error('API呼び出しでエラーが発生しました:', error);
+                document.getElementById("result").innerHTML = "データの取得中にエラーが発生しました。";
+            }
         }
     </script>
 </body>
